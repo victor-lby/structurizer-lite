@@ -1,0 +1,136 @@
+{
+  "name": "C4 Framework Dark Theme",
+  "description": "Dark theme for C4 Framework with modern dark color scheme",
+  "elements": [
+    {
+      "tag": "Person",
+      "width": 400,
+      "height": 280,
+      "background": "#2c3e50",
+      "color": "#ecf0f1",
+      "shape": "Person",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Software System",
+      "width": 450,
+      "height": 300,
+      "background": "#34495e",
+      "color": "#ecf0f1",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Container",
+      "width": 450,
+      "height": 300,
+      "background": "#5d6d7e",
+      "color": "#ecf0f1",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Component",
+      "width": 450,
+      "height": 300,
+      "background": "#85929e",
+      "color": "#2c3e50",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "External",
+      "width": 450,
+      "height": 300,
+      "background": "#566573",
+      "color": "#ecf0f1",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 80,
+      "fontSize": 24
+    },
+    {
+      "tag": "Database",
+      "width": 450,
+      "height": 300,
+      "background": "#1abc9c",
+      "color": "#ffffff",
+      "shape": "Cylinder",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Web",
+      "width": 450,
+      "height": 300,
+      "background": "#3498db",
+      "color": "#ffffff",
+      "shape": "WebBrowser",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    }
+  ],
+  "relationships": [
+    {
+      "tag": "Relationship",
+      "thickness": 2,
+      "color": "#bdc3c7",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Synchronous",
+      "thickness": 2,
+      "color": "#27ae60",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Asynchronous",
+      "thickness": 2,
+      "color": "#f39c12",
+      "dashed": true,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Database",
+      "thickness": 3,
+      "color": "#1abc9c",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    }
+  ]
+}
