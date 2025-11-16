@@ -1,0 +1,101 @@
+{
+  "name": "C4 Framework Default Theme",
+  "description": "Default theme for C4 Framework with professional blue color scheme",
+  "elements": [
+    {
+      "tag": "Person",
+      "width": 400,
+      "height": 280,
+      "background": "#08427b",
+      "color": "#ffffff",
+      "shape": "Person",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Software System",
+      "width": 450,
+      "height": 300,
+      "background": "#1168bd",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Container",
+      "width": 450,
+      "height": 300,
+      "background": "#438dd5",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Component",
+      "width": 450,
+      "height": 300,
+      "background": "#85bbf0",
+      "color": "#000000",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "External",
+      "width": 450,
+      "height": 300,
+      "background": "#999999",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 80,
+      "fontSize": 24
+    }
+  ],
+  "relationships": [
+    {
+      "tag": "Relationship",
+      "thickness": 2,
+      "color": "#707070",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Synchronous",
+      "thickness": 2,
+      "color": "#2e7d32",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Asynchronous",
+      "thickness": 2,
+      "color": "#ff9800",
+      "dashed": true,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    }
+  ]
+}
