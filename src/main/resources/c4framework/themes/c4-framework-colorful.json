@@ -1,0 +1,207 @@
+{
+  "name": "C4 Framework Colorful Theme",
+  "description": "Vibrant colorful theme for C4 Framework with distinct colors for different element types",
+  "elements": [
+    {
+      "tag": "Person",
+      "width": 400,
+      "height": 280,
+      "background": "#e74c3c",
+      "color": "#ffffff",
+      "shape": "Person",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "EndUser",
+      "width": 400,
+      "height": 280,
+      "background": "#3498db",
+      "color": "#ffffff",
+      "shape": "Person",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Admin",
+      "width": 400,
+      "height": 280,
+      "background": "#e74c3c",
+      "color": "#ffffff",
+      "shape": "Person",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Developer",
+      "width": 400,
+      "height": 280,
+      "background": "#27ae60",
+      "color": "#ffffff",
+      "shape": "Person",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Software System",
+      "width": 450,
+      "height": 300,
+      "background": "#9b59b6",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Web",
+      "width": 450,
+      "height": 300,
+      "background": "#3498db",
+      "color": "#ffffff",
+      "shape": "WebBrowser",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "API",
+      "width": 450,
+      "height": 300,
+      "background": "#27ae60",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Database",
+      "width": 450,
+      "height": 300,
+      "background": "#f39c12",
+      "color": "#ffffff",
+      "shape": "Cylinder",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Container",
+      "width": 450,
+      "height": 300,
+      "background": "#e67e22",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Component",
+      "width": 450,
+      "height": 300,
+      "background": "#1abc9c",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "Microservice",
+      "width": 450,
+      "height": 300,
+      "background": "#e91e63",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 100,
+      "fontSize": 24
+    },
+    {
+      "tag": "External",
+      "width": 450,
+      "height": 300,
+      "background": "#95a5a6",
+      "color": "#ffffff",
+      "shape": "Box",
+      "icon": "",
+      "border": "Solid",
+      "opacity": 80,
+      "fontSize": 24
+    }
+  ],
+  "relationships": [
+    {
+      "tag": "Relationship",
+      "thickness": 2,
+      "color": "#34495e",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "HTTP",
+      "thickness": 2,
+      "color": "#27ae60",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Database",
+      "thickness": 3,
+      "color": "#f39c12",
+      "dashed": false,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Async",
+      "thickness": 2,
+      "color": "#e74c3c",
+      "dashed": true,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    },
+    {
+      "tag": "Message",
+      "thickness": 2,
+      "color": "#9b59b6",
+      "dashed": true,
+      "routing": "Orthogonal",
+      "fontSize": 24,
+      "width": 200,
+      "position": 50,
+      "opacity": 100
+    }
+  ]
+}

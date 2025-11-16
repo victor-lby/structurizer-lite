@@ -36,6 +36,9 @@ public class Configuration {
     private static final String REMOTE_WORKSPACE_BRANCH_PROPERTY = "structurizr.remote.branch";
     private static final String SINGLE_WORKSPACE = "1";
 
+    private static final String C4_FRAMEWORK_ENABLED_PROPERTY = "structurizr.c4framework.enabled";
+    private static final String C4_FRAMEWORK_AUTO_INCLUDE_PROPERTY = "structurizr.c4framework.autoInclude";
+
     public static final boolean PREVIEW_FEATURES = false;
 
     private File dataDirectory;
@@ -196,6 +199,14 @@ public class Configuration {
 
     public boolean isEditable() {
         return Boolean.parseBoolean(getConfigurationParameter(EDITABLE_PROPERTY, "true"));
+    }
+
+    public boolean isC4FrameworkEnabled() {
+        return Boolean.parseBoolean(getConfigurationParameter(C4_FRAMEWORK_ENABLED_PROPERTY, "true"));
+    }
+
+    public boolean isC4FrameworkAutoInclude() {
+        return Boolean.parseBoolean(getConfigurationParameter(C4_FRAMEWORK_AUTO_INCLUDE_PROPERTY, "true"));
     }
 
     private String getEnvironmentVariable(String name) {
