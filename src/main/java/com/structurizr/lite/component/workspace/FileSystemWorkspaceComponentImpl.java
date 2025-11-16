@@ -9,7 +9,6 @@ import com.structurizr.lite.component.search.SearchComponent;
 import com.structurizr.lite.domain.WorkspaceMetaData;
 import com.structurizr.lite.util.DateUtils;
 import com.structurizr.lite.util.Image;
-import com.structurizr.util.DslTemplate;
 import com.structurizr.util.StringUtils;
 import com.structurizr.util.WorkspaceUtils;
 import com.structurizr.validation.WorkspaceScopeValidatorFactory;
@@ -45,9 +44,11 @@ class FileSystemWorkspaceComponentImpl implements WorkspaceComponent {
     private long lastModifiedDate = 0;
 
     private final SearchComponent searchComponent;
+    private final C4FrameworkService c4FrameworkService;
 
-    FileSystemWorkspaceComponentImpl(SearchComponent searchComponent) {
+    FileSystemWorkspaceComponentImpl(SearchComponent searchComponent, C4FrameworkService c4FrameworkService) {
         this.searchComponent = searchComponent;
+        this.c4FrameworkService = c4FrameworkService;
         try {
             start();
         } catch (Exception e) {
@@ -76,7 +77,8 @@ class FileSystemWorkspaceComponentImpl implements WorkspaceComponent {
             File json = new File(getDataDirectory(1), filename + ".json");
 
             if (!dsl.exists() && !json.exists()) {
-                writeToFile(new File(dataDirectory, filename + ".dsl"), DslTemplate.generate("Name", "Description"));
+                String defaultWorkspace = "workspace \"Name\" \"Description\" {\n\n    model {\n    }\n\n    views {\n    }\n\n}\n";
+                writeToFile(new File(dataDirectory, filename + ".dsl"), defaultWorkspace);
             }
         }
 
@@ -174,10 +176,27 @@ class FileSystemWorkspaceComponentImpl implements WorkspaceComponent {
         Workspace workspace = null;
 
         try {
+            File fileToParseFrom = dslFile;
+            
+            if (c4FrameworkService.shouldInjectFramework(dslFile)) {
+                try {
+                    String originalContent = Files.readString(dslFile.toPath(), StandardCharsets.UTF_8);
+                    String injectedContent = c4FrameworkService.injectFramework(originalContent);
+                    
+                    File tempDslFile = File.createTempFile("workspace-", ".dsl", Configuration.getInstance().getWorkDirectory());
+                    Files.writeString(tempDslFile.toPath(), injectedContent, StandardCharsets.UTF_8);
+                    fileToParseFrom = tempDslFile;
+                    
+                    log.info("C4 Framework auto-injected for workspace " + workspaceId);
+                } catch (Exception e) {
+                    log.warn("Could not inject C4 framework: " + e.getMessage() + ", parsing original file");
+                }
+            }
+            
             StructurizrDslParser parser = new StructurizrDslParser();
             parser.getHttpClient().allow(".*");
             parser.getHttpClient().setTimeout(1000 * 60); // 60 seconds
-            parser.parse(dslFile);
+            parser.parse(fileToParseFrom);
             workspace = parser.getWorkspace();
             workspace.setId(workspaceId);
 
