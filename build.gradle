@@ -81,3 +81,129 @@ configurations {
 configurations.all {
 	exclude group: "commons-logging", module: "commons-logging"
 }
+
+// ========================================
+// Automated UI Build Process
+// ========================================
+// Configurable properties (with sensible defaults)
+ext {
+	structurizrUiDir = file(findProperty('structurizrUiDir') ?: "${rootDir}/../structurizr-ui")
+	skipUiSync       = (findProperty('skipUiSync') ?: 'false').toBoolean()
+	uiBuildNumber    = findProperty('structurizrBuildNumber')
+	structurizrUiRepo = findProperty('structurizrUiRepo') ?: "https://github.com/structurizr/ui.git"
+	structurizrUiRef  = findProperty('structurizrUiRef')
+}
+
+// Clone structurizr-ui if missing
+tasks.register('ensureStructurizrUiRepo', Exec) {
+	onlyIf { !skipUiSync && !structurizrUiDir.exists() }
+	commandLine 'git', 'clone', '--depth', '1', structurizrUiRepo, structurizrUiDir.absolutePath
+	doFirst {
+		logger.lifecycle("Cloning structurizr-ui repository to ${structurizrUiDir.absolutePath}")
+	}
+}
+
+// Update structurizr-ui if it exists
+tasks.register('updateStructurizrUiRepo', Exec) {
+	onlyIf { !skipUiSync && file(new File(structurizrUiDir, ".git")).exists() }
+	workingDir structurizrUiDir
+	commandLine 'git', 'pull', '--ff-only'
+	ignoreExitValue = true
+	doFirst {
+		logger.lifecycle("Updating structurizr-ui repository at ${structurizrUiDir.absolutePath}")
+	}
+}
+
+// Optionally checkout a specific ref (tag/branch/commit)
+tasks.register('checkoutStructurizrUiRef') {
+	onlyIf { !skipUiSync && structurizrUiRef && file(new File(structurizrUiDir, ".git")).exists() }
+	mustRunAfter 'ensureStructurizrUiRepo'
+	doLast {
+		logger.lifecycle("Checking out structurizr-ui ref: ${structurizrUiRef}")
+		exec {
+			workingDir structurizrUiDir
+			commandLine 'git', 'checkout', structurizrUiRef
+		}
+	}
+}
+
+// Clean static asset subdirectories (matches ui.sh semantics)
+tasks.register('cleanUiStatic', Delete) {
+	onlyIf { !skipUiSync }
+	delete 'src/main/resources/static/static/bootstrap-icons',
+	       'src/main/resources/static/static/css',
+	       'src/main/resources/static/static/html',
+	       'src/main/resources/static/static/img',
+	       'src/main/resources/static/static/js'
+}
+
+// Copy everything (cross-platform) and apply optional JS renaming
+tasks.register('prepareUi', Copy) {
+	onlyIf { !skipUiSync }
+	dependsOn 'ensureStructurizrUiRepo', 'updateStructurizrUiRepo', 'checkoutStructurizrUiRef', 'cleanUiStatic'
+	
+	into projectDir
+	
+	// JS (optional build number suffix; skip structurizr-embed.js)
+	from("${structurizrUiDir}/src/js") {
+		into 'src/main/resources/static/static/js'
+		if (uiBuildNumber) {
+			rename { name ->
+				(name.startsWith('structurizr') && name.endsWith('.js') && name != 'structurizr-embed.js')
+					? name.replace('.js', "-${uiBuildNumber}.js")
+					: name
+			}
+		}
+	}
+	
+	// CSS, images, icons, HTML
+	from("${structurizrUiDir}/src/css") { into 'src/main/resources/static/static/css' }
+	from("${structurizrUiDir}/src/img") { into 'src/main/resources/static/static/img' }
+	from("${structurizrUiDir}/src/bootstrap-icons") { into 'src/main/resources/static/static/bootstrap-icons' }
+	from("${structurizrUiDir}/src/html") { into 'src/main/resources/static/static/html' }
+	
+	// JSP fragments (exclude dsl/*)
+	from("${structurizrUiDir}/src/fragments") {
+		into 'src/main/webapp/WEB-INF/fragments'
+		exclude 'dsl/**'
+	}
+	
+	// JSP (exclude review pages)
+	from("${structurizrUiDir}/src/jsp") {
+		into 'src/main/webapp/WEB-INF/jsp'
+		exclude 'review.jsp', 'review-create.jsp'
+	}
+	
+	// Java util
+	from("${structurizrUiDir}/src/java/com/structurizr/util/DslTemplate.java") {
+		into 'src/main/java/com/structurizr/util/'
+	}
+	
+	// Incremental inputs/outputs for up-to-date checks
+	inputs.dir "${structurizrUiDir}/src"
+	outputs.dir "${projectDir}/src/main/resources/static/static"
+	outputs.dir "${projectDir}/src/main/webapp/WEB-INF"
+	outputs.file "${projectDir}/src/main/java/com/structurizr/util/DslTemplate.java"
+	
+	doFirst {
+		// Sanity check that structurizr-ui repository has expected structure
+		def uiSrcDir = file("${structurizrUiDir}/src")
+		if (!uiSrcDir.exists()) {
+			throw new GradleException("""
+				structurizr-ui repository not found or has unexpected structure.
+				Expected directory: ${uiSrcDir.absolutePath}
+				
+				Options:
+				1. Let Gradle clone it automatically: ./gradlew clean build
+				2. Clone it manually: git clone https://github.com/structurizr/ui.git ${structurizrUiDir.absolutePath}
+				3. Specify custom location: ./gradlew -PstructurizrUiDir=/path/to/ui clean build
+				4. Skip UI sync (if UI files already present): ./gradlew -PskipUiSync=true clean build
+			""".stripIndent())
+		}
+		logger.lifecycle("Preparing UI assets from ${structurizrUiDir.absolutePath}")
+	}
+}
+
+// Make it automatic for every build
+tasks.named('processResources') { dependsOn 'prepareUi' }
+tasks.named('bootWar') { dependsOn 'prepareUi' }
