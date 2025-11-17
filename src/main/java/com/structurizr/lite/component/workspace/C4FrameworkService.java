@@ -232,29 +232,29 @@ public class C4FrameworkService {
             includes.append(indent).append("// Person Archetypes\n");
             List<String> personFiles = getHardcodedResourceFiles("persons");
             for (String file : personFiles) {
-                includes.append(indent).append("!include <c4framework/persons/")
-                       .append(file).append(">\n");
+                includes.append(indent).append("!include c4framework/persons/")
+                       .append(file).append("\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// System Archetypes\n");
             List<String> systemFiles = getHardcodedResourceFiles("systems");
             for (String file : systemFiles) {
-                includes.append(indent).append("!include <c4framework/systems/")
-                       .append(file).append(">\n");
+                includes.append(indent).append("!include c4framework/systems/")
+                       .append(file).append("\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// Container Archetypes\n");
             List<String> containerFiles = getHardcodedResourceFiles("containers");
             for (String file : containerFiles) {
-                includes.append(indent).append("!include <c4framework/containers/")
-                       .append(file).append(">\n");
+                includes.append(indent).append("!include c4framework/containers/")
+                       .append(file).append("\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// Component Archetypes\n");
             List<String> componentFiles = getHardcodedResourceFiles("components");
             for (String file : componentFiles) {
-                includes.append(indent).append("!include <c4framework/components/")
-                       .append(file).append(">\n");
+                includes.append(indent).append("!include c4framework/components/")
+                       .append(file).append("\n");
             }
             
         } catch (Exception e) {
@@ -274,8 +274,8 @@ public class C4FrameworkService {
         try {
             List<String> styleFiles = getHardcodedResourceFiles("styles");
             for (String file : styleFiles) {
-                includes.append(indent).append("!include <c4framework/styles/")
-                       .append(file).append(">\n");
+                includes.append(indent).append("!include c4framework/styles/")
+                       .append(file).append("\n");
             }
         } catch (Exception e) {
             log.error("Error generating framework style includes: " + e.getMessage(), e);
@@ -289,7 +289,7 @@ public class C4FrameworkService {
      */
     private String generateTerminologyInclude() {
         String indent = "        ";
-        return indent + "!include <c4framework/terminology/definitions.dsl>\n";
+        return indent + "!include c4framework/terminology/definitions.dsl\n";
     }
     
     /**
@@ -300,9 +300,9 @@ public class C4FrameworkService {
         StringBuilder themes = new StringBuilder();
         
         themes.append(indent).append("themes ")
-              .append("<c4framework/themes/c4-framework-default.json> ")
-              .append("<c4framework/themes/c4-framework-colorful.json> ")
-              .append("<c4framework/themes/c4-framework-dark.json>\n");
+              .append("c4framework/themes/c4-framework-default.json ")
+              .append("c4framework/themes/c4-framework-colorful.json ")
+              .append("c4framework/themes/c4-framework-dark.json\n");
         
         return themes.toString();
     }
