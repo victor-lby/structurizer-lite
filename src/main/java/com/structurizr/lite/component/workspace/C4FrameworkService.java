@@ -27,6 +27,8 @@ public class C4FrameworkService {
     private static final String OPT_OUT_MARKER = "!c4framework:disable";
     private static final String FRAMEWORK_PATH = "c4framework";
     
+    private volatile boolean frameworkExtracted = false;
+    
     /**
      * Checks if the workspace DSL file should have the framework injected.
      * 
@@ -65,12 +67,89 @@ public class C4FrameworkService {
     }
     
     /**
+     * Extracts framework resources from classpath to the work directory.
+     * This is necessary because Structurizr DSL parser doesn't support classpath includes.
+     */
+    private void extractFrameworkResources() {
+        if (frameworkExtracted) {
+            return;
+        }
+        
+        synchronized (this) {
+            if (frameworkExtracted) {
+                return;
+            }
+            
+            try {
+                File workDir = Configuration.getInstance().getWorkDirectory();
+                File frameworkDir = new File(workDir, FRAMEWORK_PATH);
+                
+                if (frameworkDir.exists()) {
+                    frameworkExtracted = true;
+                    log.debug("C4 Framework resources already extracted to: " + frameworkDir.getAbsolutePath());
+                    return;
+                }
+                
+                log.info("Extracting C4 Framework resources to: " + frameworkDir.getAbsolutePath());
+                
+                extractResourceDirectory("persons");
+                extractResourceDirectory("systems");
+                extractResourceDirectory("containers");
+                extractResourceDirectory("components");
+                extractResourceDirectory("styles");
+                extractResourceDirectory("terminology");
+                extractResourceDirectory("themes");
+                
+                frameworkExtracted = true;
+                log.info("C4 Framework resources extracted successfully");
+                
+            } catch (Exception e) {
+                log.error("Failed to extract C4 Framework resources: " + e.getMessage(), e);
+            }
+        }
+    }
+    
+    /**
+     * Extracts all files from a framework subdirectory to the work directory.
+     */
+    private void extractResourceDirectory(String subdirectory) throws IOException {
+        File workDir = Configuration.getInstance().getWorkDirectory();
+        File targetDir = new File(workDir, FRAMEWORK_PATH + "/" + subdirectory);
+        
+        if (!targetDir.exists()) {
+            targetDir.mkdirs();
+        }
+        
+        List<String> files = getHardcodedResourceFiles(subdirectory);
+        
+        for (String filename : files) {
+            String resourcePath = FRAMEWORK_PATH + "/" + subdirectory + "/" + filename;
+            File targetFile = new File(targetDir, filename);
+            
+            if (targetFile.exists()) {
+                continue;
+            }
+            
+            try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+                if (is != null) {
+                    Files.copy(is, targetFile.toPath());
+                    log.debug("Extracted: " + resourcePath + " -> " + targetFile.getAbsolutePath());
+                } else {
+                    log.warn("Resource not found in classpath: " + resourcePath);
+                }
+            }
+        }
+    }
+    
+    /**
      * Injects the C4 framework into the workspace DSL content.
      * 
      * @param workspaceDslContent The original workspace DSL content
      * @return The DSL content with framework injected
      */
     public String injectFramework(String workspaceDslContent) {
+        extractFrameworkResources();
+        
         StringBuilder injected = new StringBuilder();
         
         injected.append("// C4 Framework Auto-Injected\n");
@@ -150,33 +229,31 @@ public class C4FrameworkService {
         String indent = "            ";
         
         try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            
             includes.append(indent).append("// Person Archetypes\n");
-            List<String> personFiles = getResourceFiles("persons");
+            List<String> personFiles = getHardcodedResourceFiles("persons");
             for (String file : personFiles) {
-                includes.append(indent).append("!include <classpath:c4framework/persons/")
+                includes.append(indent).append("!include <c4framework/persons/")
                        .append(file).append(">\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// System Archetypes\n");
-            List<String> systemFiles = getResourceFiles("systems");
+            List<String> systemFiles = getHardcodedResourceFiles("systems");
             for (String file : systemFiles) {
-                includes.append(indent).append("!include <classpath:c4framework/systems/")
+                includes.append(indent).append("!include <c4framework/systems/")
                        .append(file).append(">\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// Container Archetypes\n");
-            List<String> containerFiles = getResourceFiles("containers");
+            List<String> containerFiles = getHardcodedResourceFiles("containers");
             for (String file : containerFiles) {
-                includes.append(indent).append("!include <classpath:c4framework/containers/")
+                includes.append(indent).append("!include <c4framework/containers/")
                        .append(file).append(">\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// Component Archetypes\n");
-            List<String> componentFiles = getResourceFiles("components");
+            List<String> componentFiles = getHardcodedResourceFiles("components");
             for (String file : componentFiles) {
-                includes.append(indent).append("!include <classpath:c4framework/components/")
+                includes.append(indent).append("!include <c4framework/components/")
                        .append(file).append(">\n");
             }
             
@@ -195,9 +272,9 @@ public class C4FrameworkService {
         String indent = "            ";
         
         try {
-            List<String> styleFiles = getResourceFiles("styles");
+            List<String> styleFiles = getHardcodedResourceFiles("styles");
             for (String file : styleFiles) {
-                includes.append(indent).append("!include <classpath:c4framework/styles/")
+                includes.append(indent).append("!include <c4framework/styles/")
                        .append(file).append(">\n");
             }
         } catch (Exception e) {
@@ -212,7 +289,7 @@ public class C4FrameworkService {
      */
     private String generateTerminologyInclude() {
         String indent = "        ";
-        return indent + "!include <classpath:c4framework/terminology/definitions.dsl>\n";
+        return indent + "!include <c4framework/terminology/definitions.dsl>\n";
     }
     
     /**
@@ -223,9 +300,9 @@ public class C4FrameworkService {
         StringBuilder themes = new StringBuilder();
         
         themes.append(indent).append("themes ")
-              .append("<classpath:c4framework/themes/c4-framework-default.json> ")
-              .append("<classpath:c4framework/themes/c4-framework-colorful.json> ")
-              .append("<classpath:c4framework/themes/c4-framework-dark.json>\n");
+              .append("<c4framework/themes/c4-framework-default.json> ")
+              .append("<c4framework/themes/c4-framework-colorful.json> ")
+              .append("<c4framework/themes/c4-framework-dark.json>\n");
         
         return themes.toString();
     }
@@ -313,6 +390,16 @@ public class C4FrameworkService {
                 return Arrays.asList(
                     "element-styles.dsl",
                     "relationship-styles.dsl"
+                );
+            case "terminology":
+                return Arrays.asList(
+                    "definitions.dsl"
+                );
+            case "themes":
+                return Arrays.asList(
+                    "c4-framework-default.json",
+                    "c4-framework-colorful.json",
+                    "c4-framework-dark.json"
                 );
             default:
                 return Arrays.asList();
