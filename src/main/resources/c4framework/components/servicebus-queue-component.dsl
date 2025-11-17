@@ -5,7 +5,7 @@
 ServiceBusQueueComponent = component {
     description "Azure Service Bus queue for reliable message queuing"
     technology "Azure Service Bus"
-    tags "Queue"
+    tags "Queue" "Unchanged"
     properties {
         "component.type" "Message Queue"
         "messaging.pattern" "Point-to-Point"

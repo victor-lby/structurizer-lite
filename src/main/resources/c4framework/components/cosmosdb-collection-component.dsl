@@ -5,7 +5,7 @@
 CosmosDBCollectionComponent = component {
     description "CosmosDB collection for document-based data storage"
     technology "CosmosDB NoSQL"
-    tags "Document Collection"
+    tags "Database" "Unchanged"
     properties {
         "component.type" "Document Collection"
         "storage.type" "Document"

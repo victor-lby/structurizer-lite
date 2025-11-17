@@ -4,7 +4,7 @@
 EventHubContainer = container {
     description "Azure Event Hub streaming data ingestion service"
     technology "Azure Event Hub"
-    tags "EbNew"
+    tags "Topic" "Unchanged"
     properties {
         "container.type" "Message Broker"
         "messaging.pattern" "Publish-Subscribe"

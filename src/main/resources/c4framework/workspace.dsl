@@ -20,7 +20,13 @@ workspace "C4 Framework" "A comprehensive C4 modeling framework with reusable ar
             !include "./systems/channel-system.dsl"
             !include "./systems/external-resource-system.dsl"
             !include "./systems/on-premise-system.dsl"
-            !include "./systems/bounded-context.dsl"
+            !include "./systems/function.dsl"
+
+            // Groups - Reusable groups for teams
+            # !include "./groups/bounded-context.dsl"
+            # !include "./groups/domain.dsl"
+            # !include "./groups/subdomain.dsl"
+            # !include "./groups/layer.dsl"
 
             // Container Archetypes - Core container patterns
             !include "./containers/apigateway-container.dsl"

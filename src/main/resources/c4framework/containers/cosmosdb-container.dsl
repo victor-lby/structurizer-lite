@@ -4,7 +4,7 @@
 CosmosDBContainer = container {
     description "Azure CosmosDB multi-model NoSQL database"
     technology "Azure CosmosDB"
-    tags "DbNew"
+    tags "Database" "Unchanged"
     properties {
         "container.type" "Database"
         "database.type" "NoSQL"

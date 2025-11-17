@@ -5,7 +5,7 @@
 MessageComponent = component {
     description "Message entity representing structured communication data"
     technology "Message Schema"
-    tags "Message"
+    tags "Message" "Unchanged"
     properties {
         "component.type" "Message Entity"
         "data.structure" "Structured"

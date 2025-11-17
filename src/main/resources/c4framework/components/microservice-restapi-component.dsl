@@ -5,7 +5,7 @@
 MicroserviceRestAPIComponent = component {
     description "Microservice REST API component for HTTP-based service interfaces"
     technology "REST API"
-    tags "REST API"
+    tags "Unchanged" "API"
     properties {
         "component.type" "REST API"
         "protocol" "HTTP/HTTPS"

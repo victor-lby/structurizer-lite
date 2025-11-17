@@ -1,5 +1,6 @@
 .structurizr
 
+.DS_Store
 .gradle/*
 build/*
 target/*

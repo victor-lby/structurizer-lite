@@ -3,7 +3,7 @@
 // NOTE: System archetypes are OPTIONAL extensions - use simple tags for clarity
 ChannelSystem = softwareSystem {
     description "Data Visualization Layer"
-    tags "Channel"
+    tags "Channel" "Unchanged"
     properties {
         "system.type" "Data Visualization Layer"
     }

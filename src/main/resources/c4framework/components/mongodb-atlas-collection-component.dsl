@@ -5,7 +5,7 @@
 MongoDBAtlasCollectionComponent = component {
     description "MongoDB Atlas collection for document-based data storage"
     technology "MongoDB Atlas"
-    tags "Document Collection"
+    tags "Database" "Unchanged"
     properties {
         "component.type" "Document Collection"
         "storage.type" "Document"

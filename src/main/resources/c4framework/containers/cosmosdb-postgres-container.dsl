@@ -4,7 +4,7 @@
 CosmosDBPostgreSQLContainer = container {
     description "Azure CosmosDB for PostgreSQL distributed database"
     technology "Azure CosmosDB for PostgreSQL"
-    tags "DbNew"
+    tags "Database" "Unchanged"
     properties {
         "container.type" "Database"
         "database.type" "Relational"

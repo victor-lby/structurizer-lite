@@ -3,7 +3,7 @@
 // NOTE: System archetypes are OPTIONAL extensions - use simple tags for clarity
 AzureServiceSystem = softwareSystem {
     description "Azure cloud service-based system"
-    tags "Azure"
+    tags "Azure" "Unchanged"
     properties {
         "system.type" "Azure Cloud Service"
         "cloud.provider" "Microsoft Azure"

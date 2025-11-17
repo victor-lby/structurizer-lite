@@ -5,7 +5,7 @@
 MicroserviceSOAPComponent = component {
     description "Microservice SOAP component for XML-based service interfaces"
     technology "SOAP/WSDL"
-    tags "SOAP"
+    tags "API" "Unchanged"
     properties {
         "component.type" "SOAP Service"
         "protocol" "HTTP/HTTPS"

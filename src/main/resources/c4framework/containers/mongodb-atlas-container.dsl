@@ -4,7 +4,7 @@
 MongoDBAtlasContainer = container {
     description "MongoDB Atlas cloud-native document database"
     technology "MongoDB Atlas"
-    tags "DbNew"
+    tags "Database" "Unchanged"
     properties {
         "container.type" "Database"
         "database.type" "Document"

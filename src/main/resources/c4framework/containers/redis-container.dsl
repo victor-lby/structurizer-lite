@@ -4,7 +4,7 @@
 RedisContainer = container {
     description "Redis in-memory data structure store used as cache"
     technology "Redis"
-    tags "DbNew"
+    tags "Cache" "Unchanged"
     properties {
         "container.type" "Cache"
         "database.type" "Key-Value Store"

@@ -4,7 +4,7 @@
 ServiceBusContainer = container {
     description "Azure Service Bus enterprise messaging service"
     technology "Azure Service Bus"
-    tags "EbNew"
+    tags "Queue" "Unchanged"
     properties {
         "container.type" "Message Broker"
         "messaging.pattern" "Queue,Publish-Subscribe"

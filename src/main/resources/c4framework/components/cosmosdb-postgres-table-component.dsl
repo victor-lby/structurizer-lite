@@ -5,7 +5,7 @@
 CosmosDBPostgresTableComponent = component {
     description "CosmosDB PostgreSQL table for relational data storage"
     technology "CosmosDB PostgreSQL"
-    tags "Table"
+    tags "Database" "Unchanged"
     properties {
         "component.type" "Database Table"
         "storage.type" "Relational"

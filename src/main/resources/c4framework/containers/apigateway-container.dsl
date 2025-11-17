@@ -1,10 +1,10 @@
 // API Gateway container archetype
 // Provides standard properties and tags for API Gateway containers
 // STATUS TAGS: Use GatewayNew, GatewayAlt, or GatewaySame to indicate gateway status
-APIGatewayContainer = container {
+APIGatewayContainer = container "API Gateway" {
     description "API Gateway for routing and managing API requests"
     technology "Axway"
-    tags "GatewayNew"
+    tags "API" "Unchanged"
     properties {
         "container.type" "API Gateway"
         "function" "Request Routing,Load Balancing"

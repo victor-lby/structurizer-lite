@@ -4,7 +4,7 @@
 MicroserviceJavaContainer = container {
     description "Java-based microservice container"
     technology "Java Spring Boot"
-    tags "SvcNew"
+    tags "Microservice" "Unchanged"
     properties {
         "container.type" "Microservice"
         "runtime" "JVM"

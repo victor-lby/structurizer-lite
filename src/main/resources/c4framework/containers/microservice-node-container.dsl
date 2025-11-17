@@ -4,7 +4,7 @@
 MicroserviceNodeContainer = container {
     description "Node.js-based microservice container"
     technology "Node.js Express"
-    tags "SvcNew"
+    tags "Microservice" "Unchanged"
     properties {
         "container.type" "Microservice"
         "runtime" "Node.js"

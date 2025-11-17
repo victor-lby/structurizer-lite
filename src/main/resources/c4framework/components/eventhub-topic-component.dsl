@@ -5,7 +5,7 @@
 EventHubTopicComponent = component {
     description "Azure Event Hub topic for event streaming and data ingestion"
     technology "Azure Event Hub"
-    tags "Topic"
+    tags "Topic" "Unchanged"
     properties {
         "component.type" "Event Topic"
         "messaging.pattern" "Publish-Subscribe"

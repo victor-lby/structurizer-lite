@@ -34,15 +34,3 @@ relationship "ASYNC" {
     color "#5a5a5a"
     routing orthogonal
 }
-
-// ============================================
-// DATABASE ACCESS
-// ============================================
-// Protocols: JDBC, SQL, queries, read/write
-// Usage: service -> db "read/write via JDBC"
-relationship "DB" {
-    dashed false
-    thickness 2
-    color "#5a5a5a"
-    routing orthogonal
-}
