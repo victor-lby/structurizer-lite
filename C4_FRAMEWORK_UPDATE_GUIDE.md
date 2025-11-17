@@ -4,26 +4,28 @@ This guide explains how to update the C4 Framework archetypes, styles, themes, a
 
 ## Overview
 
-The C4 Framework auto-injection feature extracts framework resources from the JAR file to the filesystem at runtime. The list of files to extract is **hardcoded** in the `C4FrameworkService.java` file, so when the framework is updated with new files, you need to update the code manually.
+The C4 Framework auto-injection feature uses **dynamic classpath scanning** to automatically discover framework resources at runtime. When you add new framework files to the `src/main/resources/c4framework/` directory, they will be automatically detected and included without requiring code changes.
+
+The implementation uses Spring's `PathMatchingResourcePatternResolver` to scan for `.dsl` and `.json` files in the framework subdirectories. A hardcoded fallback list is maintained for compatibility in case scanning fails in some environments.
 
 ## Update Process
 
-### Step 1: Update Framework Resource Files
+### Step 1: Add New Framework Files
 
-First, update the framework resource files in the project:
+Simply add your new framework files to the appropriate subdirectory:
 
 ```bash
 # Navigate to the framework resources directory
 cd src/main/resources/c4framework/
 
-# Update the files in the appropriate subdirectories:
-# - persons/       (person archetypes)
-# - systems/       (system archetypes)
-# - containers/    (container archetypes)
-# - components/    (component archetypes)
-# - styles/        (element and relationship styles)
-# - terminology/   (terminology definitions)
-# - themes/        (JSON theme files)
+# Add files to the appropriate subdirectories:
+# - persons/       (person archetypes - .dsl files)
+# - systems/       (system archetypes - .dsl files)
+# - containers/    (container archetypes - .dsl files)
+# - components/    (component archetypes - .dsl files)
+# - styles/        (element and relationship styles - .dsl files)
+# - terminology/   (terminology definitions - .dsl files)
+# - themes/        (JSON theme files - .json files)
 ```
 
 **Example:** If you add a new person archetype file `new-person.dsl`, place it in:
@@ -31,105 +33,9 @@ cd src/main/resources/c4framework/
 src/main/resources/c4framework/persons/new-person.dsl
 ```
 
-### Step 2: Update Hardcoded File Lists
+**That's it!** The dynamic scanning will automatically discover and include the new file.
 
-Open the file:
-```
-src/main/java/com/structurizr/lite/component/workspace/C4FrameworkService.java
-```
-
-Find the `getHardcodedResourceFiles()` method (around line 341) and update the appropriate case statement.
-
-#### Example: Adding a New Person Archetype
-
-If you added `new-person.dsl` to the `persons/` directory:
-
-**Before:**
-```java
-case "persons":
-    return Arrays.asList(
-        "agente-externo-person.dsl",
-        "arquiteto-person.dsl",
-        "cliente-person.dsl",
-        "consultor-person.dsl",
-        "desenvolvedor-person.dsl",
-        "diretor-person.dsl",
-        "gerente-loja-person.dsl",
-        "gerente-regional-person.dsl",
-        "gerente-territorial-person.dsl"
-    );
-```
-
-**After:**
-```java
-case "persons":
-    return Arrays.asList(
-        "agente-externo-person.dsl",
-        "arquiteto-person.dsl",
-        "cliente-person.dsl",
-        "consultor-person.dsl",
-        "desenvolvedor-person.dsl",
-        "diretor-person.dsl",
-        "gerente-loja-person.dsl",
-        "gerente-regional-person.dsl",
-        "gerente-territorial-person.dsl",
-        "new-person.dsl"  // <-- Add new file here
-    );
-```
-
-#### Example: Adding a New Container Archetype
-
-If you added `kafka-container.dsl` to the `containers/` directory:
-
-```java
-case "containers":
-    return Arrays.asList(
-        "apigateway-container.dsl",
-        "cosmosdb-container.dsl",
-        "cosmosdb-postgres-container.dsl",
-        "eventhub-container.dsl",
-        "kafka-container.dsl",  // <-- Add new file here
-        "keyvault-container.dsl",
-        "microservice-java-container.dsl",
-        "microservice-node-container.dsl",
-        "mongodb-atlas-container.dsl",
-        "redis-container.dsl",
-        "servicebus-container.dsl"
-    );
-```
-
-#### Example: Adding a New Theme
-
-If you added `c4-framework-custom.json` to the `themes/` directory:
-
-```java
-case "themes":
-    return Arrays.asList(
-        "c4-framework-default.json",
-        "c4-framework-colorful.json",
-        "c4-framework-dark.json",
-        "c4-framework-custom.json"  // <-- Add new file here
-    );
-```
-
-**Important:** Also update the `generateThemeReferences()` method (around line 298) to include the new theme in the generated DSL:
-
-```java
-private String generateThemeReferences() {
-    String indent = "        ";
-    StringBuilder themes = new StringBuilder();
-    
-    themes.append(indent).append("themes ")
-          .append("c4framework/themes/c4-framework-default.json ")
-          .append("c4framework/themes/c4-framework-colorful.json ")
-          .append("c4framework/themes/c4-framework-dark.json ")
-          .append("c4framework/themes/c4-framework-custom.json\n");  // <-- Add here
-    
-    return themes.toString();
-}
-```
-
-### Step 3: Rebuild and Test
+### Step 2: Rebuild and Test
 
 After updating the code:
 
@@ -226,25 +132,31 @@ docker exec structurizr-c4 cat /usr/local/structurizr/.structurizr/c4framework/p
 
 ## Important Notes
 
-### Why Hardcoded Lists?
+### How Dynamic Scanning Works
 
-The current implementation uses hardcoded file lists because:
-1. **Classpath scanning is complex** in Spring Boot fat JARs
-2. **Predictable behavior** - you know exactly which files will be extracted
-3. **Performance** - no runtime directory scanning needed
-4. **Explicit control** - you decide which files to include
+The implementation uses Spring's `PathMatchingResourcePatternResolver` to scan classpath resources:
 
-### Future Improvements
+1. **Automatic Discovery**: On first workspace load, the system scans for all `.dsl` files in archetype subdirectories and `.json` files in the themes subdirectory
+2. **Caching**: Discovered files are cached in memory to avoid repeated scanning
+3. **Sorted Output**: Files are automatically sorted alphabetically for consistent DSL generation
+4. **Fallback**: If scanning fails (rare edge case), the system falls back to a hardcoded list
 
-Consider these improvements for easier maintenance:
+**Benefits:**
+- **Zero maintenance** - just add files to the resources directory
+- **Works in all environments** - IDE, fat JAR, Docker
+- **Automatic logging** - see discovered files in application logs
+- **Predictable behavior** - sorted, deduplicated results
 
-1. **Automated file list generation**: Create a Gradle task that scans the `src/main/resources/c4framework/` directory and generates the hardcoded lists automatically during build.
+### Hardcoded Fallback List
 
-2. **Runtime directory scanning**: Implement classpath resource scanning to automatically discover framework files (more complex but eliminates manual updates).
+A hardcoded fallback list is maintained in `C4FrameworkService.getHardcodedResourceFiles()` for compatibility. This list is only used if dynamic scanning fails (which should be extremely rare).
 
-3. **Configuration file**: Move the file lists to a JSON/YAML configuration file that's easier to update.
+**When to update the fallback list:**
+- If you want to ensure compatibility in exotic deployment scenarios
+- If you notice scanning failures in your environment
+- As a best practice when adding many new files
 
-4. **Validation script**: Create a script that compares the files in `src/main/resources/c4framework/` with the hardcoded lists and warns about mismatches.
+The fallback list is NOT required for normal operation - dynamic scanning handles everything automatically.
 
 ### Troubleshooting
 
@@ -252,15 +164,23 @@ Consider these improvements for easier maintenance:
 
 **Solution:** 
 1. Verify the file exists in `src/main/resources/c4framework/[subdirectory]/`
-2. Check that the filename is added to the hardcoded list in `getHardcodedResourceFiles()`
+2. Check the file extension is correct (`.dsl` for archetypes, `.json` for themes)
 3. Rebuild the project: `./gradlew clean build`
 4. Rebuild Docker image: `docker build -t structurizr-lite-c4framework:latest .`
-5. Remove old container and create new one
+5. Check Docker logs for "Discovered" messages: `docker logs structurizr-c4 | grep Discovered`
+
+**Problem:** Dynamic scanning not finding files
+
+**Solution:**
+1. Verify the file was included in the WAR: `jar tf build/libs/structurizr-lite.war | grep c4framework`
+2. Check Docker logs for scanning errors: `docker logs structurizr-c4 | grep "Resource scan failed"`
+3. The system will automatically fall back to the hardcoded list if scanning fails
+4. Check application logs for "falling back to hardcoded list" warning
 
 **Problem:** Framework extraction fails with "Resource not found"
 
 **Solution:**
-1. Check the filename spelling in the hardcoded list matches exactly (case-sensitive)
+1. Check the filename spelling matches exactly (case-sensitive)
 2. Verify the file was included in the WAR: `jar tf build/libs/structurizr-lite.war | grep c4framework`
 3. Check Docker logs: `docker logs structurizr-c4 | grep ERROR`
 
@@ -268,7 +188,7 @@ Consider these improvements for easier maintenance:
 
 ```bash
 # List current framework files in resources
-find src/main/resources/c4framework/ -type f -name "*.dsl" -o -name "*.json"
+find src/main/resources/c4framework/ -type f \( -name "*.dsl" -o -name "*.json" \)
 
 # Count files per subdirectory
 ls src/main/resources/c4framework/persons/ | wc -l
@@ -281,6 +201,14 @@ jar tf build/libs/structurizr-lite.war | grep c4framework | sort
 
 # Check extracted files in running container
 docker exec structurizr-c4 find /usr/local/structurizr/.structurizr/c4framework/ -type f | sort
+
+# View dynamic scanning logs
+docker logs structurizr-c4 | grep "Discovered"
+
+# Example output:
+# Discovered 9 c4framework/persons resources: [agente-externo-person.dsl, ...]
+# Discovered 5 c4framework/systems resources: [...]
+# Discovered 10 c4framework/containers resources: [...]
 ```
 
 ## Contact

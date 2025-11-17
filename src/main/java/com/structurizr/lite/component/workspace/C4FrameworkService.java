@@ -3,6 +3,9 @@ package com.structurizr.lite.component.workspace;
 import com.structurizr.lite.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -10,8 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +31,8 @@ public class C4FrameworkService {
     private static final String FRAMEWORK_PATH = "c4framework";
     
     private volatile boolean frameworkExtracted = false;
+    private final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
+    private final Map<String, List<String>> discoveredFiles = new ConcurrentHashMap<>();
     
     /**
      * Checks if the workspace DSL file should have the framework injected.
@@ -120,7 +125,7 @@ public class C4FrameworkService {
             targetDir.mkdirs();
         }
         
-        List<String> files = getHardcodedResourceFiles(subdirectory);
+        List<String> files = getResourceFiles(subdirectory);
         
         for (String filename : files) {
             String resourcePath = FRAMEWORK_PATH + "/" + subdirectory + "/" + filename;
@@ -130,13 +135,12 @@ public class C4FrameworkService {
                 continue;
             }
             
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-                if (is != null) {
-                    Files.copy(is, targetFile.toPath());
-                    log.debug("Extracted: " + resourcePath + " -> " + targetFile.getAbsolutePath());
-                } else {
-                    log.warn("Resource not found in classpath: " + resourcePath);
-                }
+            Resource resource = resolver.getResource("classpath:" + resourcePath);
+            try (InputStream is = resource.getInputStream()) {
+                Files.copy(is, targetFile.toPath());
+                log.debug("Extracted: " + resourcePath + " -> " + targetFile.getAbsolutePath());
+            } catch (IOException e) {
+                log.warn("Failed to extract resource: " + resourcePath, e);
             }
         }
     }
@@ -230,28 +234,28 @@ public class C4FrameworkService {
         
         try {
             includes.append(indent).append("// Person Archetypes\n");
-            List<String> personFiles = getHardcodedResourceFiles("persons");
+            List<String> personFiles = getResourceFiles("persons");
             for (String file : personFiles) {
                 includes.append(indent).append("!include c4framework/persons/")
                        .append(file).append("\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// System Archetypes\n");
-            List<String> systemFiles = getHardcodedResourceFiles("systems");
+            List<String> systemFiles = getResourceFiles("systems");
             for (String file : systemFiles) {
                 includes.append(indent).append("!include c4framework/systems/")
                        .append(file).append("\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// Container Archetypes\n");
-            List<String> containerFiles = getHardcodedResourceFiles("containers");
+            List<String> containerFiles = getResourceFiles("containers");
             for (String file : containerFiles) {
                 includes.append(indent).append("!include c4framework/containers/")
                        .append(file).append("\n");
             }
             
             includes.append(indent).append("\n").append(indent).append("// Component Archetypes\n");
-            List<String> componentFiles = getHardcodedResourceFiles("components");
+            List<String> componentFiles = getResourceFiles("components");
             for (String file : componentFiles) {
                 includes.append(indent).append("!include c4framework/components/")
                        .append(file).append("\n");
@@ -272,7 +276,7 @@ public class C4FrameworkService {
         String indent = "            ";
         
         try {
-            List<String> styleFiles = getHardcodedResourceFiles("styles");
+            List<String> styleFiles = getResourceFiles("styles");
             for (String file : styleFiles) {
                 includes.append(indent).append("!include c4framework/styles/")
                        .append(file).append("\n");
@@ -289,7 +293,15 @@ public class C4FrameworkService {
      */
     private String generateTerminologyInclude() {
         String indent = "        ";
-        return indent + "!include c4framework/terminology/definitions.dsl\n";
+        StringBuilder includes = new StringBuilder();
+        
+        List<String> terminologyFiles = getResourceFiles("terminology");
+        for (String file : terminologyFiles) {
+            includes.append(indent).append("!include c4framework/terminology/")
+                   .append(file).append("\n");
+        }
+        
+        return includes.toString();
     }
     
     /**
@@ -297,41 +309,67 @@ public class C4FrameworkService {
      */
     private String generateThemeReferences() {
         String indent = "        ";
-        StringBuilder themes = new StringBuilder();
+        List<String> themeFiles = getResourceFiles("themes");
         
-        themes.append(indent).append("themes ")
-              .append("c4framework/themes/c4-framework-default.json ")
-              .append("c4framework/themes/c4-framework-colorful.json ")
-              .append("c4framework/themes/c4-framework-dark.json\n");
+        if (themeFiles.isEmpty()) {
+            return "";
+        }
         
-        return themes.toString();
+        String themePaths = themeFiles.stream()
+                .map(f -> "c4framework/themes/" + f)
+                .collect(Collectors.joining(" "));
+        
+        return indent + "themes " + themePaths + "\n";
     }
     
     /**
-     * Gets list of DSL files in a framework subdirectory.
+     * Gets list of framework files in a subdirectory using dynamic classpath scanning.
+     * Falls back to hardcoded list if scanning fails.
      * 
      * @param subdirectory The subdirectory name (e.g., "persons", "systems")
-     * @return List of DSL filenames
+     * @return Sorted list of filenames
      */
     private List<String> getResourceFiles(String subdirectory) {
-        try {
-            File resourceDir = new File("src/main/resources/c4framework/" + subdirectory);
-            if (resourceDir.exists() && resourceDir.isDirectory()) {
-                File[] files = resourceDir.listFiles((dir, name) -> name.endsWith(".dsl"));
-                if (files != null) {
-                    return Arrays.stream(files)
-                            .map(File::getName)
-                            .sorted()
-                            .collect(Collectors.toList());
+        return discoveredFiles.computeIfAbsent(subdirectory, this::scanResourcesForSubdir);
+    }
+    
+    /**
+     * Scans classpath for framework resources in a specific subdirectory.
+     * Uses PathMatchingResourcePatternResolver to work in both IDE and fat JAR environments.
+     */
+    private List<String> scanResourcesForSubdir(String subdir) {
+        Set<String> names = new TreeSet<>(); // Sorted and deduplicated
+        String base = FRAMEWORK_PATH + "/" + subdir + "/";
+        
+        String[] extensions = "themes".equals(subdir) ? new String[]{"json"} : new String[]{"dsl"};
+        
+        for (String ext : extensions) {
+            String[] patterns = new String[] {
+                "classpath*:/" + base + "*." + ext,
+                "classpath*:" + base + "*." + ext
+            };
+            
+            for (String pattern : patterns) {
+                try {
+                    Resource[] resources = resolver.getResources(pattern);
+                    for (Resource r : resources) {
+                        if (r.exists() && r.isReadable() && r.getFilename() != null) {
+                            names.add(r.getFilename());
+                        }
+                    }
+                } catch (IOException e) {
+                    log.debug("Resource scan failed for pattern " + pattern + ": " + e.getMessage());
                 }
             }
-            
-            return getHardcodedResourceFiles(subdirectory);
-            
-        } catch (Exception e) {
-            log.warn("Could not list resource files for " + subdirectory + ": " + e.getMessage());
-            return getHardcodedResourceFiles(subdirectory);
         }
+        
+        if (names.isEmpty()) {
+            log.warn("No resources found for c4framework/" + subdir + ", falling back to hardcoded list");
+            return getHardcodedResourceFiles(subdir);
+        }
+        
+        log.info("Discovered " + names.size() + " c4framework/" + subdir + " resources: " + names);
+        return new ArrayList<>(names);
     }
     
     /**
